@@ -49,7 +49,8 @@ angular.module('slick', []).directive('slick', [
         variableWidth: '@',
         vertical: '@',
         prevArrow: '@',
-        nextArrow: '@'
+        nextArrow: '@',
+        control: '@'
       },
       link: function (scope, element, attrs) {
         var destroySlick, initializeSlick, isInitialized;
@@ -64,8 +65,9 @@ angular.module('slick', []).directive('slick', [
         };
         initializeSlick = function () {
           return $timeout(function () {
-            var currentIndex, slider;
-            slider = $(element);
+            var currentIndex, 
+                slider = $(element)
+                methods = ['slickGoTo', 'slickNext', 'slickPrev', 'slickPause', 'slickPlay', 'slickAdd', 'slickRemove', 'slickFilter', 'slickUnfilter', 'unslick'];
             if (scope.currentIndex != null) {
               currentIndex = scope.currentIndex;
             }
@@ -129,6 +131,16 @@ angular.module('slick', []).directive('slick', [
               prevArrow: scope.prevArrow ? $(scope.prevArrow) : void 0,
               nextArrow: scope.nextArrow ? $(scope.nextArrow) : void 0
             });
+            if (scope.control) {
+              scope.$parent[scope.control] = {};
+              methods.forEach(function (value) {
+                scope.$parent[scope.control][value] = function () {
+                  var args = Array.prototype.slice.call(arguments);
+                  args.unshift(value);
+                  slider.slick.apply(element, args);
+                };
+              });
+            }
             return scope.$watch('currentIndex', function (newVal, oldVal) {
               if (currentIndex != null && newVal != null && newVal !== currentIndex) {
                 return slider.slickGoTo(newVal);
